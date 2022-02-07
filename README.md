@@ -1,3 +1,3 @@
 # Joseph
 
-OpenGL FFT multichannel Visualizer
+OpenGL FFT multichannel waterfall Visualizer
