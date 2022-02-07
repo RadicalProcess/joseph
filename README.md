@@ -1,4 +1,3 @@
-# template
+# Joseph
 
-
-radical space template project
+OpenGL FFT multichannel Visualizer
