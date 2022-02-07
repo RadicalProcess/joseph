@@ -1,10 +1,7 @@
 cmake_minimum_required(VERSION 3.15)
-project(template VERSION 0.0.0)
+project(joseph VERSION 1.0.0)
 
-if(NOT DEFINED PRODUCT_VERSION)
-    set(PRODUCT_VERSION "0.0.0")
-endif()
-message("Trevor Version = ${PRODUCT_VERSION}")
+
 
 include(cmake/platforms.cmake)
 
