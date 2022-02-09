@@ -7,3 +7,6 @@
 [submodule "dependencies/kissfft"]
 	path = dependencies/kissfft
 	url = https://github.com/mborgerding/kissfft.git
+[submodule "dependencies/glm"]
+	path = dependencies/glm
+	url = https://github.com/g-truc/glm.git

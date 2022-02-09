@@ -22,6 +22,7 @@ target_link_libraries(Visualizer
     PUBLIC
     juce::juce_opengl
     juce::juce_gui_basics
+    glm::glm
     VisualizerResource
     rp::UICore)
 
