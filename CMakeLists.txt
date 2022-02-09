@@ -21,7 +21,8 @@ target_include_directories(joseph PRIVATE include)
 target_sources(joseph
     PRIVATE
         source/PluginEditor.cpp
-        source/PluginProcessor.cpp)
+        source/PluginProcessor.cpp
+        source/SpectrumAnalyzer.cpp)
 
 target_compile_definitions(joseph
     PUBLIC
@@ -32,7 +33,9 @@ target_compile_definitions(joseph
 target_link_libraries(joseph
     PRIVATE
         juce::juce_audio_utils
+        juce::juce_dsp
         rp::UICore
+        rp::Visualizer
     PUBLIC
         juce::juce_recommended_config_flags
         juce::juce_recommended_lto_flags

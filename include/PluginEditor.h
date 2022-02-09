@@ -1,18 +1,23 @@
 #pragma once
 
 #include "PluginProcessor.h"
+#include <visualizer/Visualizer.h>
 
-class AudioPluginAudioProcessorEditor  : public juce::AudioProcessorEditor
+namespace rp::joseph
 {
-public:
-    explicit AudioPluginAudioProcessorEditor (rp::joseph::AudioPluginAudioProcessor&);
-    ~AudioPluginAudioProcessorEditor() override;
+    class AudioPluginAudioProcessorEditor : public juce::AudioProcessorEditor
+    {
+    public:
+        explicit AudioPluginAudioProcessorEditor(AudioPluginAudioProcessor&);
 
-    void paint (juce::Graphics&) override;
-    void resized() override;
+        ~AudioPluginAudioProcessorEditor() override;
 
-private:
-    rp::joseph::AudioPluginAudioProcessor& processorRef;
+        void paint(juce::Graphics&) override;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AudioPluginAudioProcessorEditor)
-};
+        void resized() override;
+
+    private:
+        Visualizer visualizer_;
+        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AudioPluginAudioProcessorEditor)
+    };
+}

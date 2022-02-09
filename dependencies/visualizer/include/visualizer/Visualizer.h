@@ -45,7 +45,7 @@ namespace rp::joseph
         juce::OpenGLContext openGLContext_;
 
         std::unique_ptr<juce::OpenGLShaderProgram> shader_;
-        std::unique_ptr<Spectrum> spectrum_;
+        std::vector<std::unique_ptr<Spectrum>> spectrums_;
 
         std::unique_ptr<Attributes> attributes_;
         std::unique_ptr<Uniforms> uniforms_;
@@ -54,14 +54,15 @@ namespace rp::joseph
         const std::array<float, 4> foreGroundColor_;
         const std::array<float, 4> backGroundColor_;
         const std::array<float, 4> highlightColor_;
-        std::vector<bool> segments_;
 
         float azimuth_ {0.0f};
         float azimuthSnapshot_ {0.0f};
-        float elevation_ {0.0f};
+        float elevation_ {0.1f};
         float elevationSnapshot_ {0.0f};
-        float distance_ { 0.05f};
+        float distance_ { 0.5f };
         const float angleLimit = static_cast<float>(M_PI_4 / 2.0f);
+
+        size_t index_ { 0 };
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Visualizer)
     };
 }

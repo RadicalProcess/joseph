@@ -1,10 +1,15 @@
 #pragma once
-
+#include <mutex>
 #include <juce_audio_processors/juce_audio_processors.h>
+#include <visualizer/IDataProvider.h>
+#include "SpectrumAnalyzer.h"
+#include "SpectrumAnalyzer.h"
 
 namespace rp::joseph
 {
     class AudioPluginAudioProcessor : public juce::AudioProcessor
+                                    , public SpectrumAnalyzer::Listener
+                                    , public IDataProvider
     {
     public:
         AudioPluginAudioProcessor();
@@ -49,7 +54,18 @@ namespace rp::joseph
 
         void setStateInformation(const void* data, int sizeInBytes) override;
 
+        bool isNewDataReady() override;
     private:
+        void onSpectrumReady(std::vector<float>& samples) override;
+
+        const std::vector<float>& getSpectrum() override;
+
+        SpectrumAnalyzer spectrumAnalyzer_;
+
+        std::mutex mutex_;
+        std::vector<float> spectrum_;
+        bool newDataReady_;
+
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AudioPluginAudioProcessor)
     };
 }

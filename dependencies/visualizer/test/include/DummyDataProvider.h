@@ -11,7 +11,9 @@ namespace rp::joseph::visualizer_test
 
         ~DummyDataProvider() override = default;
 
-        const std::vector<float>& getSpectrum() const override;
+        const std::vector<float>& getSpectrum() override;
+
+        bool isNewDataReady() override;
 
     private:
         std::vector<float> spectrum_;

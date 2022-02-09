@@ -10,8 +10,13 @@ namespace rp::joseph::visualizer_test
             spectrum_[i] = static_cast<float>(rand() % 10000) / 10000.0f;
     }
 
-    const std::vector<float>& DummyDataProvider::getSpectrum() const
+    const std::vector<float>& DummyDataProvider::getSpectrum()
     {
         return spectrum_;
+    }
+
+    bool DummyDataProvider::isNewDataReady()
+    {
+        return true;
     }
 }

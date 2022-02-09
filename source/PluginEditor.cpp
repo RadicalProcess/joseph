@@ -1,28 +1,27 @@
 #include "PluginProcessor.h"
 #include "PluginEditor.h"
 
-AudioPluginAudioProcessorEditor::AudioPluginAudioProcessorEditor (rp::joseph::AudioPluginAudioProcessor& p)
-    : AudioProcessorEditor (&p), processorRef (p)
+namespace rp::joseph
 {
-    juce::ignoreUnused (processorRef);
+    AudioPluginAudioProcessorEditor::AudioPluginAudioProcessorEditor(AudioPluginAudioProcessor& p)
+    : AudioProcessorEditor(&p)
+    , visualizer_(p)
+    {
 
-    setSize(400, 300);
-}
+        setSize(800, 600);
+        addAndMakeVisible(visualizer_);
+    }
 
-AudioPluginAudioProcessorEditor::~AudioPluginAudioProcessorEditor()
-{
-}
+    AudioPluginAudioProcessorEditor::~AudioPluginAudioProcessorEditor()
+    {
+    }
 
-void AudioPluginAudioProcessorEditor::paint (juce::Graphics& g)
-{
-    g.fillAll (getLookAndFeel().findColour (juce::ResizableWindow::backgroundColourId));
+    void AudioPluginAudioProcessorEditor::paint(juce::Graphics&)
+    {
+    }
 
-    g.setColour (juce::Colours::white);
-    g.setFont (15.0f);
-    g.drawFittedText ("Hello World!", getLocalBounds(), juce::Justification::centred, 1);
-}
-
-void AudioPluginAudioProcessorEditor::resized()
-{
-
+    void AudioPluginAudioProcessorEditor::resized()
+    {
+        visualizer_.setBounds(getLocalBounds());
+    }
 }
