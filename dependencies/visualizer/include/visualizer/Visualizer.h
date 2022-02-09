@@ -29,11 +29,17 @@ namespace rp::joseph
 
         void paint(juce::Graphics& g) override;
 
+        void mouseDown(const juce::MouseEvent& event) override;
+
+        void mouseWheelMove(const juce::MouseEvent& event, const juce::MouseWheelDetails& wheel) override;
+
     private:
-        juce::Matrix3D<float> getProjectionMatrix() const;
 
         void updateData(const std::vector<float>& sepectrum);
         void resized() override;
+
+        void mouseDrag(const juce::MouseEvent& event) override;
+
 
         IDataProvider& dataProvider_;
         juce::OpenGLContext openGLContext_;
@@ -50,6 +56,12 @@ namespace rp::joseph
         const std::array<float, 4> highlightColor_;
         std::vector<bool> segments_;
 
+        float azimuth_ {0.0f};
+        float azimuthSnapshot_ {0.0f};
+        float elevation_ {0.0f};
+        float elevationSnapshot_ {0.0f};
+        float distance_ { 0.05f};
+        const float angleLimit = static_cast<float>(M_PI_4 / 2.0f);
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Visualizer)
     };
 }

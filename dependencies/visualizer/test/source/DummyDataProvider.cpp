@@ -7,9 +7,7 @@ namespace rp::joseph::visualizer_test
     : spectrum_(2048)
     {
         for(auto i = 0; i < 2048; ++i)
-        {
             spectrum_[i] = static_cast<float>(rand() % 10000) / 10000.0f;
-        }
     }
 
     const std::vector<float>& DummyDataProvider::getSpectrum() const

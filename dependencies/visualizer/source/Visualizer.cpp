@@ -13,12 +13,11 @@ namespace rp::joseph
 {
     namespace
     {
-
-
-        glm::mat4x4 getViewMatrix()
+        glm::mat4x4 getProjectionMatrix(float aspectRatio)
         {
-            return glm::lookAt(glm::vec3(0.0f, 0.0f, -0.02f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+            return glm::perspective(60.f, aspectRatio, 0.001f, 30.0f);
         }
+
     }
 
     using namespace uicore::styles;
@@ -57,16 +56,6 @@ namespace rp::joseph
 
     void Visualizer::resized(){}
 
-    juce::Matrix3D<float> Visualizer::getProjectionMatrix() const
-    {
-        auto w = 1.0f / (0.5f + 0.1f);
-        auto h = w * getLocalBounds().toFloat().getAspectRatio (false);
-
-        return juce::Matrix3D<float>::fromFrustum (-w, w, -h, h, 0.01f, 3.0f);
-    }
-
-
-
     void Visualizer::render()
     {
         using namespace ::juce::gl;
@@ -84,8 +73,13 @@ namespace rp::joseph
         spectrum_->bind();
         spectrum_->update();
         attributes_->enable();
-        uniforms_->get("projectionMatrix").setMatrix4(getProjectionMatrix().mat, 1, false);
-        uniforms_->get("viewMatrix").setMatrix4(glm::value_ptr(getViewMatrix()), 1, false);
+        const auto aspectRatio = getLocalBounds().toFloat().getAspectRatio();
+        uniforms_->get("projectionMatrix").setMatrix4(glm::value_ptr(getProjectionMatrix(aspectRatio)), 1, false);
+
+        const auto cameraPosition = glm::vec3(std::sinf(azimuth_) * distance_, std::sinf(elevation_) * distance_, std::cosf(azimuth_) * std::cosf(elevation_) * distance_);
+        const auto viewMatrix = glm::lookAt(cameraPosition, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+
+        uniforms_->get("viewMatrix").setMatrix4(glm::value_ptr(viewMatrix), 1, false);
         uniforms_->get("lineColor").set(1.0f, 1.0f, 1.0f, 1.0f);
         glDrawArrays(GL_LINE_STRIP, 0, spectrum_->getNumVertices());
         attributes_->disable();
@@ -105,5 +99,24 @@ namespace rp::joseph
 
     void Visualizer::paint(Graphics&)
     {
+    }
+
+    void Visualizer::mouseDown(const MouseEvent& event)
+    {
+        azimuthSnapshot_ = azimuth_;
+        elevationSnapshot_ = elevation_;
+    }
+
+    void Visualizer::mouseWheelMove(const MouseEvent& event, const MouseWheelDetails& wheel)
+    {
+       distance_ = std::clamp(distance_ + wheel.deltaY * -0.1f, 0.05f, 0.5f);
+    }
+
+    void Visualizer::mouseDrag(const MouseEvent& event)
+    {
+        auto mouseDownPosition = event.getMouseDownPosition();
+        auto travel = mouseDownPosition - event.getPosition();
+        azimuth_ = std::clamp(azimuthSnapshot_ - static_cast<float>(travel.getX()) / 5000.0f, -angleLimit, angleLimit);
+        elevation_ = std::clamp(elevationSnapshot_ - static_cast<float>(travel.getY()) / 5000.0f, -angleLimit, angleLimit);
     }
 }
