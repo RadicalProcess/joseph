@@ -31,7 +31,6 @@ namespace rp::joseph
 
     private:
         juce::Matrix3D<float> getProjectionMatrix() const;
-        juce::Matrix3D<float> getViewMatrix() const;
 
         void updateData(const std::vector<float>& sepectrum);
         void resized() override;

@@ -1,6 +1,8 @@
 #include "Visualizer.h"
 
 #include <vector>
+#include <glm/gtc/type_ptr.hpp>
+#include <glm/gtc/matrix_transform.hpp>
 #include <UICore/Style.h>
 #include <VisualizerResource.h>
 #include "Constants.h"
@@ -9,6 +11,16 @@ using namespace juce;
 
 namespace rp::joseph
 {
+    namespace
+    {
+
+
+        glm::mat4x4 getViewMatrix()
+        {
+            return glm::lookAt(glm::vec3(0.0f, 0.0f, -0.02f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+        }
+    }
+
     using namespace uicore::styles;
 
     Visualizer::Visualizer(IDataProvider& dataProvider)
@@ -53,11 +65,7 @@ namespace rp::joseph
         return juce::Matrix3D<float>::fromFrustum (-w, w, -h, h, 0.01f, 3.0f);
     }
 
-    juce::Matrix3D<float> Visualizer::getViewMatrix() const
-    {
-        juce::Matrix3D<float> viewMatrix ({ -0.1f, 0.1f, -0.01f });
-        return viewMatrix;
-    }
+
 
     void Visualizer::render()
     {
@@ -77,7 +85,7 @@ namespace rp::joseph
         spectrum_->update();
         attributes_->enable();
         uniforms_->get("projectionMatrix").setMatrix4(getProjectionMatrix().mat, 1, false);
-        uniforms_->get("viewMatrix").setMatrix4(getViewMatrix().mat, 1, false);
+        uniforms_->get("viewMatrix").setMatrix4(glm::value_ptr(getViewMatrix()), 1, false);
         uniforms_->get("lineColor").set(1.0f, 1.0f, 1.0f, 1.0f);
         glDrawArrays(GL_LINE_STRIP, 0, spectrum_->getNumVertices());
         attributes_->disable();
