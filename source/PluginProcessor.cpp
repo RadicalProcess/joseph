@@ -7,7 +7,7 @@ namespace rp::joseph
     AudioPluginAudioProcessor::AudioPluginAudioProcessor()
     : AudioProcessor(BusesProperties().withInput("Input", juce::AudioChannelSet::stereo(), true).withOutput("Output", juce::AudioChannelSet::stereo(), true))
     , spectrumAnalyzer_(Constants::fftOrder)
-    , spectrum_(Constants::fftSize)
+    , spectra_(Constants::maxChannelCount, std::vector<float>(Constants::fftSize, 0.0f))
     , newDataReady_(false)
     {
         spectrumAnalyzer_.addListener(this);
@@ -22,7 +22,9 @@ namespace rp::joseph
 
     void AudioPluginAudioProcessor::processBlock(juce::AudioBuffer<float>& buffer, juce::MidiBuffer&)
     {
-        spectrumAnalyzer_.addSample(buffer.getReadPointer(0), static_cast<size_t>(buffer.getNumSamples()));
+        spectrumAnalyzer_.addSample(buffer.getArrayOfReadPointers(),
+                                    static_cast<size_t>(buffer.getNumChannels()),
+                                    static_cast<size_t>(buffer.getNumSamples()));
     }
 
     const juce::String AudioPluginAudioProcessor::getName() const
@@ -73,18 +75,19 @@ namespace rp::joseph
     void AudioPluginAudioProcessor::setStateInformation(const void*, int)
     {}
 
-    void AudioPluginAudioProcessor::onSpectrumReady(std::vector<float>& samples)
+    void AudioPluginAudioProcessor::onSpectrumReady(std::vector<std::vector<float>>& fftBuffers)
     {
         const auto guard = std::lock_guard<std::mutex>(mutex_);
-        std::memcpy(spectrum_.data(), samples.data(), sizeof(float) * spectrum_.size());
+        for(auto i = static_cast<size_t>(0); i < Constants::maxChannelCount; ++i)
+            std::memcpy(spectra_[i].data(), fftBuffers[i].data(), sizeof(float) * spectra_[i].size());
         newDataReady_ = true;
     }
 
-    const std::vector<float>& AudioPluginAudioProcessor::getSpectrum()
+    const std::vector<std::vector<float>>& AudioPluginAudioProcessor::getSpectra()
     {
         const auto guard = std::lock_guard<std::mutex>(mutex_);
         newDataReady_ = false;
-        return spectrum_;
+        return spectra_;
     }
 
     bool AudioPluginAudioProcessor::isNewDataReady()

@@ -55,15 +55,16 @@ namespace rp::joseph
         void setStateInformation(const void* data, int sizeInBytes) override;
 
         bool isNewDataReady() override;
-    private:
-        void onSpectrumReady(std::vector<float>& samples) override;
 
-        const std::vector<float>& getSpectrum() override;
+    private:
+        void onSpectrumReady(std::vector<std::vector<float>>& fftBuffers) override;
+
+        const std::vector<std::vector<float>>& getSpectra() override;
 
         SpectrumAnalyzer spectrumAnalyzer_;
 
         std::mutex mutex_;
-        std::vector<float> spectrum_;
+        std::vector<std::vector<float>> spectra_;
         bool newDataReady_;
 
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AudioPluginAudioProcessor)

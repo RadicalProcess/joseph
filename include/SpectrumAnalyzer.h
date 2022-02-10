@@ -15,12 +15,12 @@ namespace rp::joseph
         public:
             virtual ~Listener() = default;
 
-            virtual void onSpectrumReady(std::vector<float>& samples) = 0;
+            virtual void onSpectrumReady(std::vector<std::vector<float>>& fftBuffers) = 0;
         };
 
         SpectrumAnalyzer(size_t fftOrder);
 
-        void addSample(const float* sample, size_t count);
+        void addSample(const float** buffers, size_t channelCount, size_t bufferSize);
 
         void addListener(Listener* listener);
 
@@ -28,7 +28,7 @@ namespace rp::joseph
 
     private:
 
-        std::vector<float> fftBuffer_;
+        std::vector<std::vector<float>> fftBuffers_;
         size_t sampleCount_;
         std::set<Listener*> listeners_;
 

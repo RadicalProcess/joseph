@@ -35,7 +35,7 @@ namespace rp::joseph
 
     private:
 
-        void updateData(const std::vector<float>& sepectrum);
+        void updateData(const std::vector<std::vector<float>>& spectra);
         void resized() override;
 
         void mouseDrag(const juce::MouseEvent& event) override;
@@ -45,7 +45,7 @@ namespace rp::joseph
         juce::OpenGLContext openGLContext_;
 
         std::unique_ptr<juce::OpenGLShaderProgram> shader_;
-        std::vector<std::unique_ptr<Spectrum>> spectrums_;
+        std::vector<std::vector<Spectrum>> multiChannelSpectra_;
 
         std::unique_ptr<Attributes> attributes_;
         std::unique_ptr<Uniforms> uniforms_;

@@ -12,15 +12,6 @@ using namespace juce;
 
 namespace rp::joseph
 {
-    namespace
-    {
-        glm::mat4x4 getProjectionMatrix(float aspectRatio)
-        {
-            return glm::perspective(90.f, aspectRatio, 0.001f, 30.0f);
-        }
-
-    }
-
     using namespace uicore::styles;
 
     Visualizer::Visualizer(IDataProvider& dataProvider)
@@ -30,7 +21,6 @@ namespace rp::joseph
     , backGroundColor_({background.getFloatRed(), background.getFloatGreen(), background.getFloatBlue(), 1.0f})
     , highlightColor_({highlight.getFloatRed(), highlight.getFloatGreen(), highlight.getFloatBlue(), 1.0f})
     {
-
     }
 
     Visualizer::~Visualizer()
@@ -48,13 +38,10 @@ namespace rp::joseph
         if(!(vertexResult && fragResult && linkResult))
             throw std::runtime_error("GL setup error");
 
-        for(auto i = 0; i < Constants::historySize; ++i)
-            spectrums_.push_back(std::make_unique<Spectrum>(Constants::fftSize/2));
+        multiChannelSpectra_.resize(Constants::maxChannelCount, std::vector<Spectrum>(Constants::historySize, Spectrum(Constants::nyquistSize)));
 
         attributes_ = std::make_unique<Attributes>(*shader_);
         uniforms_ = std::make_unique<Uniforms>(openGLContext_, *shader_, std::vector<std::string>{"projectionMatrix", "viewMatrix","lineColor", "zTransform"});
-
-
     }
 
     void Visualizer::shutdown(){}
@@ -72,30 +59,33 @@ namespace rp::joseph
         shader_->use();
 
         if(dataProvider_.isNewDataReady())
-            updateData(dataProvider_.getSpectrum());
+            updateData(dataProvider_.getSpectra());
 
         glLineWidth(1.0f);
         glEnable(gl::GL_BLEND);
         glBlendFunc(gl::GL_SRC_ALPHA, gl::GL_ONE_MINUS_SRC_ALPHA);
-        for(auto i = 0; i < Constants::historySize; ++i)
+
+        const auto aspectRatio = getLocalBounds().toFloat().getAspectRatio();
+        const auto projectionMatrix = glm::perspective(90.f, aspectRatio, 0.001f, 30.0f);
+        for(auto c = 0; c < multiChannelSpectra_.size(); ++c)
         {
-            spectrums_[i]->bind();
-            spectrums_[i]->update();
-            attributes_->enable();
-            const auto aspectRatio = getLocalBounds().toFloat().getAspectRatio();
-            uniforms_->get("projectionMatrix").setMatrix4(glm::value_ptr(getProjectionMatrix(aspectRatio)), 1, false);
+            for (auto i = 0; i < Constants::historySize; ++i)
+            {
+                multiChannelSpectra_[c][i].bind();
+                multiChannelSpectra_[c][i].update(); // this should be done in updateData
+                attributes_->enable();
+                uniforms_->get("projectionMatrix").setMatrix4(glm::value_ptr(projectionMatrix), 1, false);
+                const auto cameraPosition = glm::euclidean(glm::vec2(elevation_, azimuth_)) * distance_;
+                const auto viewMatrix = glm::lookAt(cameraPosition, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+                uniforms_->get("viewMatrix").setMatrix4(glm::value_ptr(viewMatrix), 1, false);
+                uniforms_->get("lineColor").set(1.0f, 1.0f, 1.0f, 0.6f);
 
-            const auto cameraPosition = glm::euclidean(glm::vec2(elevation_, azimuth_)) * distance_;
-            const auto viewMatrix = glm::lookAt(cameraPosition, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-
-            uniforms_->get("viewMatrix").setMatrix4(glm::value_ptr(viewMatrix), 1, false);
-            uniforms_->get("lineColor").set(1.0f, 1.0f, 1.0f, 0.6f);
-
-            auto zTransform = static_cast<float>(index_) - static_cast<float>(i);
-            zTransform = zTransform < 0.0f ? zTransform + static_cast<float>(Constants::historySize) : zTransform;
-            uniforms_->get("zTransform").set(zTransform * -0.5f);
-            glDrawArrays(GL_LINE_STRIP, 0, spectrums_[i]->getNumVertices());
-            attributes_->disable();
+                auto zTransform = static_cast<float>(index_) - static_cast<float>(i);
+                zTransform = zTransform < 0.0f ? zTransform + static_cast<float>(Constants::historySize) : zTransform;
+                uniforms_->get("zTransform").set(zTransform * -0.5f);
+                glDrawArrays(GL_LINE_STRIP, 0, multiChannelSpectra_[c][i].getNumVertices());
+                attributes_->disable();
+            }
         }
         glBindBuffer (GL_ARRAY_BUFFER, 0);
         glUseProgram(0);
@@ -103,12 +93,16 @@ namespace rp::joseph
         attributes_->disable();
     }
 
-    void Visualizer::updateData(const std::vector<float>& spectrum)
+    void Visualizer::updateData(const std::vector<std::vector<float>>& spectra)
     {
         index_ = (index_+1) % Constants::historySize;
-        auto& positions = spectrums_[index_]->getPosition();
-        for(auto i = static_cast<size_t>(0); i < positions.size(); ++i)
-            positions[i][1] = spectrum[i];
+        for(auto c = static_cast<size_t>(0); c < spectra.size(); ++c)
+        {
+            auto& positions = multiChannelSpectra_[c][index_].getPosition();
+            const auto& spectrum = spectra[c];
+            for(auto s = static_cast<size_t>(0); s < positions.size(); ++s)
+                positions[s][1] = spectrum[s];
+        }
     }
 
     void Visualizer::paint(Graphics&)
