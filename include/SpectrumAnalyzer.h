@@ -28,8 +28,8 @@ namespace rp::joseph
 
     private:
 
-        std::vector<float> cache_;
         std::vector<float> fftBuffer_;
+        size_t sampleCount_;
         std::set<Listener*> listeners_;
 
         juce::dsp::WindowingFunction<float> hannWindow_;

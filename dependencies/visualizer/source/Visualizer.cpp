@@ -49,7 +49,7 @@ namespace rp::joseph
             throw std::runtime_error("GL setup error");
 
         for(auto i = 0; i < Constants::historySize; ++i)
-            spectrums_.push_back(std::make_unique<Spectrum>(Constants::fftSize));
+            spectrums_.push_back(std::make_unique<Spectrum>(Constants::fftSize/2));
 
         attributes_ = std::make_unique<Attributes>(*shader_);
         uniforms_ = std::make_unique<Uniforms>(openGLContext_, *shader_, std::vector<std::string>{"projectionMatrix", "viewMatrix","lineColor", "zTransform"});
@@ -107,9 +107,8 @@ namespace rp::joseph
     {
         index_ = (index_+1) % Constants::historySize;
         auto& positions = spectrums_[index_]->getPosition();
-        for(auto i = static_cast<size_t>(0); i < spectrum.size(); ++i)
+        for(auto i = static_cast<size_t>(0); i < positions.size(); ++i)
             positions[i][1] = spectrum[i];
-
     }
 
     void Visualizer::paint(Graphics&)
