@@ -11,6 +11,7 @@
 #include "Attributes.h"
 #include "Uniforms.h"
 #include "Spectrum.h"
+#include "Guides.h"
 
 namespace rp::joseph
 {
@@ -34,18 +35,19 @@ namespace rp::joseph
         void mouseWheelMove(const juce::MouseEvent& event, const juce::MouseWheelDetails& wheel) override;
 
     private:
-
         void updateData(const std::vector<std::vector<float>>& spectra);
+
         void resized() override;
 
         void mouseDrag(const juce::MouseEvent& event) override;
 
-
+        const float sampleRate_;
         IDataProvider& dataProvider_;
         juce::OpenGLContext openGLContext_;
 
         std::unique_ptr<juce::OpenGLShaderProgram> shader_;
         std::vector<std::vector<Spectrum>> multiChannelSpectra_;
+        std::unique_ptr<Guides> guides_;
 
         std::unique_ptr<Attributes> attributes_;
         std::unique_ptr<Uniforms> uniforms_;

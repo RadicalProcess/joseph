@@ -1,25 +1,28 @@
 #include "Spectrum.h"
-
+#include "Utility.h"
 namespace rp::joseph
 {
     namespace
     {
-        std::vector<Position> createSpectrum(size_t size)
+        std::vector<Position> createSpectrum(float sampleRate, size_t size)
         {
-            auto waveform = std::vector<Position>();
-            waveform.reserve(size);
+            auto positions = std::vector<Position>();
+            const auto nyquistFreq = sampleRate / 2.0f;
+            const auto binWidth = nyquistFreq / static_cast<float>(size);
+            auto binCenterHz = binWidth / 2.0f;
 
-            for(auto i = 0; i < static_cast<int>(size); i++)
+            while(binCenterHz <= rp::joseph::Constants::maxHz)
             {
-                const auto x = std::log2f(static_cast<float>(i)) / 5.0f;
-                waveform.emplace_back(Position{x + -1.0f, 0.0f, 0.f});
+                positions.emplace_back(Position{normalize(binCenterHz), 0.0f, 0.f});
+                binCenterHz += binWidth;
             }
-            return waveform;
+
+            return positions;
         }
     }
 
-    Spectrum::Spectrum(size_t size)
-    : positions_(createSpectrum(size))
+    Spectrum::Spectrum(float sampleRate, size_t size)
+    : positions_(createSpectrum(sampleRate, size))
     , vbo_(positions_)
     {
     }

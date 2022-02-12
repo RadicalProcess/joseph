@@ -56,6 +56,8 @@ namespace rp::joseph
 
         bool isNewDataReady() override;
 
+        float getSampleRate() override;
+
     private:
         void onSpectrumReady(std::vector<std::vector<float>>& fftBuffers) override;
 

@@ -11,7 +11,7 @@ namespace rp::joseph
         juce::OpenGLExtensionFunctions::glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer_);
         juce::OpenGLExtensionFunctions::glBufferData(
                 GL_ARRAY_BUFFER,
-                static_cast<GLsizeiptr> (static_cast<size_t> (positions.size()) * sizeof(Position)),
+                static_cast<GLsizeiptr> (positions.size() * sizeof(float) * 3),
                 positions.data(), mode);
     }
 

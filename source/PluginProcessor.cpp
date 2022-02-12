@@ -95,6 +95,11 @@ namespace rp::joseph
         const auto guard = std::lock_guard<std::mutex>(mutex_);
         return newDataReady_;
     }
+
+    float AudioPluginAudioProcessor::getSampleRate()
+    {
+        return static_cast<float>(AudioProcessor::getSampleRate());
+    }
 }
 
 juce::AudioProcessor* JUCE_CALLTYPE createPluginFilter()

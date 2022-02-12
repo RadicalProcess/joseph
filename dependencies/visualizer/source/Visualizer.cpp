@@ -7,6 +7,7 @@
 #include <UICore/Style.h>
 #include <VisualizerResource.h>
 #include "Constants.h"
+#include "Utility.h"
 
 using namespace juce;
 
@@ -15,7 +16,8 @@ namespace rp::joseph
     using namespace uicore::styles;
 
     Visualizer::Visualizer(IDataProvider& dataProvider)
-    : dataProvider_(dataProvider)
+    : sampleRate_(dataProvider.getSampleRate())
+    , dataProvider_(dataProvider)
     , whiteColor_({1.0f, 1.0f, 1.0f, 1.0f})
     , foreGroundColor_({foreground.getFloatRed(), foreground.getFloatGreen(), foreground.getFloatBlue(), 1.0f})
     , backGroundColor_({background.getFloatRed(), background.getFloatGreen(), background.getFloatBlue(), 1.0f})
@@ -38,10 +40,11 @@ namespace rp::joseph
         if(!(vertexResult && fragResult && linkResult))
             throw std::runtime_error("GL setup error");
 
-        multiChannelSpectra_.resize(Constants::maxChannelCount, std::vector<Spectrum>(Constants::historySize, Spectrum(Constants::nyquistSize)));
-
         attributes_ = std::make_unique<Attributes>(*shader_);
         uniforms_ = std::make_unique<Uniforms>(openGLContext_, *shader_, std::vector<std::string>{"projectionMatrix", "viewMatrix","lineColor", "zTransform"});
+
+        multiChannelSpectra_.resize(Constants::maxChannelCount, std::vector<Spectrum>(Constants::historySize, Spectrum(sampleRate_, Constants::binsToBeDisplayed)));
+        guides_ = std::make_unique<Guides>();
     }
 
     void Visualizer::shutdown(){}
@@ -67,31 +70,47 @@ namespace rp::joseph
 
         const auto aspectRatio = getLocalBounds().toFloat().getAspectRatio();
         const auto projectionMatrix = glm::perspective(90.f, aspectRatio, 0.001f, 30.0f);
+        const auto cameraPosition = glm::euclidean(glm::vec2(elevation_, azimuth_)) * distance_;
+        const auto viewMatrix = glm::lookAt(cameraPosition, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+
         for(auto c = 0; c < multiChannelSpectra_.size(); ++c)
         {
+            const auto color = Constants::colors[c];
+
             for (auto i = 0; i < Constants::historySize; ++i)
             {
+                auto zTransform = static_cast<float>(index_) - static_cast<float>(i);
+                zTransform = zTransform < 0.0f ? zTransform + static_cast<float>(Constants::historySize) : zTransform;
+
                 multiChannelSpectra_[c][i].bind();
                 multiChannelSpectra_[c][i].update(); // this should be done in updateData
                 attributes_->enable();
                 uniforms_->get("projectionMatrix").setMatrix4(glm::value_ptr(projectionMatrix), 1, false);
-                const auto cameraPosition = glm::euclidean(glm::vec2(elevation_, azimuth_)) * distance_;
-                const auto viewMatrix = glm::lookAt(cameraPosition, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
                 uniforms_->get("viewMatrix").setMatrix4(glm::value_ptr(viewMatrix), 1, false);
-                uniforms_->get("lineColor").set(1.0f, 1.0f, 1.0f, 0.6f);
-
-                auto zTransform = static_cast<float>(index_) - static_cast<float>(i);
-                zTransform = zTransform < 0.0f ? zTransform + static_cast<float>(Constants::historySize) : zTransform;
+                uniforms_->get("lineColor").set(color[0], color[1], color[2], 0.6f);
                 uniforms_->get("zTransform").set(zTransform * -0.5f);
                 glDrawArrays(GL_LINE_STRIP, 0, multiChannelSpectra_[c][i].getNumVertices());
                 attributes_->disable();
             }
         }
+        glDisable(GL_BLEND);
+
+        guides_->bind();
+        attributes_->enable();
+        uniforms_->get("projectionMatrix").setMatrix4(glm::value_ptr(projectionMatrix), 1, false);
+        uniforms_->get("viewMatrix").setMatrix4(glm::value_ptr(viewMatrix), 1, false);
+        uniforms_->get("lineColor").set(foreGroundColor_[0], foreGroundColor_[1], foreGroundColor_[2], 0.4f);
+        uniforms_->get("zTransform").set(0.0f);
+        glDrawArrays(GL_LINES, 0, guides_->getNumVertices());
+        attributes_->disable();
+
         glBindBuffer (GL_ARRAY_BUFFER, 0);
         glUseProgram(0);
-        glDisable(GL_BLEND);
         attributes_->disable();
+
     }
+
+
 
     void Visualizer::updateData(const std::vector<std::vector<float>>& spectra)
     {
@@ -127,7 +146,5 @@ namespace rp::joseph
 
         azimuth_ = azimuthSnapshot_ - static_cast<float>(travel.getX()) / 500.0f;
         elevation_ = elevationSnapshot_ - static_cast<float>(travel.getY()) / 500.0f;
-
-
     }
 }

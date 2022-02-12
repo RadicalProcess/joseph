@@ -1,6 +1,7 @@
 add_subdirectory(test)
 
 add_library(Visualizer
+    source/Guides.cpp
     source/Visualizer.cpp
     source/Vbo.cpp
     source/Spectrum.cpp

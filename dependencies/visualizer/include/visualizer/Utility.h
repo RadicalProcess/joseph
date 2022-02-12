@@ -2,18 +2,15 @@
 
 #include <glm/glm.hpp>
 
-#include <dearVRCore/CoordinateSystem.h>
+#include "Constants.h"
 
 namespace rp::joseph
 {
-    inline glm::vec3 toVec3(const CoordinateSystem& coordinateSystem)
+    inline float normalize(float frequency)
     {
-        return glm::vec3(coordinateSystem.getX(), coordinateSystem.getY(), coordinateSystem.getZ());
-    }
-
-    inline CoordinateSystem toRightHandSystem(const CoordinateSystem& leftHandCoordinate)
-    {
-        return CoordinateSystem::cartesian(leftHandCoordinate.getX(), leftHandCoordinate.getY(), -leftHandCoordinate.getZ());
+        const static float min = std::log10f(Constants::minHz);
+        const static float distance = std::log10f(Constants::maxHz) - min;
+        return (std::log10(frequency) - min) / distance * 2.0f - 1.0f;
     }
 
 }

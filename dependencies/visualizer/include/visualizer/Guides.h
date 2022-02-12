@@ -1,22 +1,17 @@
 #pragma once
 
-
 #include "Vbo.h"
 
 namespace rp::joseph
 {
-    class Spectrum
+    class Guides
     {
     public:
-        Spectrum(float sampleRate, size_t size);
-
-        void update();
+        Guides();
 
         void bind();
 
-       GLsizei getNumVertices() const;
-
-       std::vector<Position>& getPosition();
+        GLsizei getNumVertices() const;
 
     private:
         std::vector<Position> positions_;

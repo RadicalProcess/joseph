@@ -42,7 +42,7 @@ namespace rp::joseph
 
             for(auto i = static_cast<size_t>(0); i < channelCount; ++i)
             {
-                std::fill(fftBuffers_[i].begin() + Constants::nyquistSize, fftBuffers_[i].end(), 0.0f);
+                std::fill(fftBuffers_[i].begin() + Constants::binsToBeDisplayed, fftBuffers_[i].end(), 0.0f);
                 std::memcpy(fftBuffers_[i].data(), buffers[i] + samplesRequired, sizeof(float) * remaining);
             }
             sampleCount_ = remaining;
