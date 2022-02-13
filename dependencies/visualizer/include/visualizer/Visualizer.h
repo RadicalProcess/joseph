@@ -4,6 +4,8 @@
 #include <vector>
 #include <array>
 
+#include <glm/glm.hpp>
+
 #include <juce_opengl/juce_opengl.h>
 #include <juce_gui_basics/juce_gui_basics.h>
 
@@ -63,6 +65,10 @@ namespace rp::joseph
         float elevationSnapshot_ {0.0f};
         float distance_ { 0.5f };
         const float angleLimit = static_cast<float>(M_PI_4 / 2.0f);
+
+        glm::mat4x4 projectionMatrix_;
+        glm::mat4x4 viewMatrix_;
+
 
         size_t index_ { 0 };
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Visualizer)

@@ -12,5 +12,4 @@ namespace rp::joseph
         const static float distance = std::log10f(Constants::maxHz) - min;
         return (std::log10(frequency) - min) / distance * 2.0f - 1.0f;
     }
-
 }
