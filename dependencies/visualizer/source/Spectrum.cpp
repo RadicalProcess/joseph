@@ -9,7 +9,7 @@ namespace rp::joseph
             auto positions = std::vector<Position>();
             const auto nyquistFreq = sampleRate / 2.0f;
             const auto binWidth = nyquistFreq / static_cast<float>(size);
-            auto binCenterHz = binWidth / 2.0f;
+            auto binCenterHz = std::max(binWidth / 2.0f, Constants::minHz);
 
             while(binCenterHz <= rp::joseph::Constants::maxHz)
             {

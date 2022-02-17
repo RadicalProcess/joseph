@@ -66,8 +66,7 @@ namespace rp::joseph
         float distance_ { 0.5f };
         const float angleLimit = static_cast<float>(M_PI_4 / 2.0f);
 
-        glm::mat4x4 projectionMatrix_;
-        glm::mat4x4 viewMatrix_;
+        glm::mat4x4 projectionViewMatrix_;
 
 
         size_t index_ { 0 };

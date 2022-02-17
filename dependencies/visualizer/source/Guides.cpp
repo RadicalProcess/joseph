@@ -16,6 +16,12 @@ namespace rp::joseph
                 positions.emplace_back(Position{positionX, 0.0f, -10.0f});
                 positions.emplace_back(Position{positionX, 0.0f, 0.0f});
             }
+
+            for(auto labelDecibel : Constants::labelDecibels)
+            {
+                positions.emplace_back(Position{-1.0f, 1.0f, 0.0f});
+                positions.emplace_back(Position{-1.0f, 0.0f, 0.0f});
+            }
             return positions;
         }
     }
