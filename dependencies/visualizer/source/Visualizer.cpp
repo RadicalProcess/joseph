@@ -61,10 +61,19 @@ namespace rp::joseph
         glViewport(0, 0, roundToInt (desktopScale * (float) getWidth()), roundToInt (desktopScale * (float) getHeight()));
         shader_->use();
 
+        glLineWidth(1.0f);
+        guides_->bind();
+        attributes_->enable();
+        uniforms_->get("projectionViewMatrix").setMatrix4(glm::value_ptr(projectionViewMatrix_), 1, false);
+        uniforms_->get("lineColor").set(foreGroundColor_[0], foreGroundColor_[1], foreGroundColor_[2], 0.4f);
+        uniforms_->get("zTransform").set(0.0f);
+        glDrawArrays(GL_LINES, 0, guides_->getNumVertices());
+        attributes_->disable();
+
         if(dataProvider_.isNewDataReady())
             updateData(dataProvider_.getSpectra());
 
-        glLineWidth(1.0f);
+        glLineWidth(2.0f);
         glEnable(gl::GL_BLEND);
         glBlendFunc(gl::GL_SRC_ALPHA, gl::GL_ONE_MINUS_SRC_ALPHA);
 
@@ -95,13 +104,7 @@ namespace rp::joseph
         }
         glDisable(GL_BLEND);
 
-        guides_->bind();
-        attributes_->enable();
-        uniforms_->get("projectionViewMatrix").setMatrix4(glm::value_ptr(projectionViewMatrix_), 1, false);
-        uniforms_->get("lineColor").set(foreGroundColor_[0], foreGroundColor_[1], foreGroundColor_[2], 0.4f);
-        uniforms_->get("zTransform").set(0.0f);
-        glDrawArrays(GL_LINES, 0, guides_->getNumVertices());
-        attributes_->disable();
+
 
         glBindBuffer (GL_ARRAY_BUFFER, 0);
         glUseProgram(0);
@@ -133,6 +136,8 @@ namespace rp::joseph
             const auto xPosition = normalize(freq);
             const auto origin = glm::vec4(xPosition, 0.0f, 0.0f, 1.0f);
             const auto homogeneousSpacePosition = projectionViewMatrix_ * origin;
+            if (homogeneousSpacePosition.z < 0.0f)
+                continue;
             const auto normalizedPosition = glm::vec3(homogeneousSpacePosition) / homogeneousSpacePosition.w;
             const auto x = (normalizedPosition.x + 1.0f) / 2.0f * static_cast<float>(bounds.getWidth());
             const auto y = (-normalizedPosition.y + 1.0f) / 2.0f * static_cast<float>(bounds.getHeight());
@@ -145,6 +150,9 @@ namespace rp::joseph
             const auto yPosition = (decibel + 100.0f) / 100.0f;
             const auto origin = glm::vec4(-1.0f, yPosition, 0.0f, 1.0f);
             const auto homogeneousSpacePosition = projectionViewMatrix_ * origin;
+            if (homogeneousSpacePosition.z < 0.0f)
+                continue;
+
             const auto normalizedPosition = glm::vec3(homogeneousSpacePosition) / homogeneousSpacePosition.w;
             const auto x = (normalizedPosition.x + 1.0f) / 2.0f * static_cast<float>(bounds.getWidth());
             const auto y = (-normalizedPosition.y + 1.0f) / 2.0f * static_cast<float>(bounds.getHeight());

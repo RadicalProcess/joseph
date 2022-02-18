@@ -59,11 +59,11 @@ namespace rp::joseph
         const std::array<float, 4> backGroundColor_;
         const std::array<float, 4> highlightColor_;
 
-        float azimuth_ {0.0f};
-        float azimuthSnapshot_ {0.0f};
-        float elevation_ {0.1f};
-        float elevationSnapshot_ {0.0f};
-        float distance_ { 0.5f };
+        float azimuth_ { 0.0f };
+        float azimuthSnapshot_ { 0.0f };
+        float elevation_ { 0.1f };
+        float elevationSnapshot_ { 0.0f };
+        float distance_ { 0.6f };
         const float angleLimit = static_cast<float>(M_PI_4 / 2.0f);
 
         glm::mat4x4 projectionViewMatrix_;
