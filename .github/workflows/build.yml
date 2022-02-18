@@ -162,7 +162,7 @@ jobs:
 
   add-documents-to-packages:
     name: Adding documents to packages
-    needs: [test_mac, test_win]
+    needs: build
     runs-on: windows-latest
     steps:
       - name: Checkout
